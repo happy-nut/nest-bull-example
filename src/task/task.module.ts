@@ -51,7 +51,7 @@ export class TaskModule implements OnModuleInit {
      * Processing 3 for 20 seconds
      * OnQueueActive 3
      * discard & moveToCompleted
-     * Processing done 3
+     * Processing done 3 (20초 지남)
      * OnQueueError Error: Missing lock for job 3 failed
      * OnQueueDrained
      */
@@ -63,27 +63,48 @@ export class TaskModule implements OnModuleInit {
      * Processing 5 for 40 seconds
      * OnQueueActive 5
      * moveToCompleted & discard
-     * Processing done 5
+     * Processing done 5 (40초 지남)
      * OnQueueError Error: Missing lock for job 5 failed
      * OnQueueDrained
      */
 
     // 방법 6. moveToCompleted(ignore lock) & discard 호출.
-    this.method6(job);
+    // this.method6(job);
     /* 결과 6.
      * OnQueueWaiting 7
      * Processing 7 for 30 seconds
      * OnQueueActive 7
      * moveToCompleted & discard
-     * Processing done 7
+     * Processing done 7 (30초 지남)
      * OnQueueCompleted 7 undefined
+     * OnQueueDrained
+     */
+
+    // 방법 7. moveToCompleted(ignore lock) & remove 호출.
+    this.method7(job);
+    /* 결과 7.
+     * OnQueueWaiting 18
+     * Processing 18 for 30 seconds
+     * OnQueueActive 18
+     * moveToCompleted & remove: Error: Could not remove job 18
+     * Processing done 18 (30초 지남)
+     * OnQueueCompleted 18 undefined
      * OnQueueDrained
      */
   }
 
+  private method7(job: Job) {
+    setTimeout(async () => {
+      console.log('moveToCompleted & remove');
+      await job.moveToCompleted(undefined, true);
+      await job.remove();
+      await this.showJobs();
+    }, 4000);
+  }
+
   private method6(job: Job) {
     setTimeout(async () => {
-      console.log('moveToCompleted & discard ');
+      console.log('moveToCompleted & discard');
       await job.moveToCompleted(undefined, true);
       await job.discard();
       await this.showJobs();
@@ -119,6 +140,7 @@ export class TaskModule implements OnModuleInit {
 
   private method2(job: Job) {
     setTimeout(async () => {
+      console.log('jobIdPromise cancel');
       this.jobIdPromiseMap[job.id].cancel();
       await this.showJobs();
 
@@ -129,6 +151,7 @@ export class TaskModule implements OnModuleInit {
 
   private method1(job: Job) {
     setTimeout(async () => {
+      console.log('remove');
       await job.remove();
       await this.showJobs();
     }, 4000);
