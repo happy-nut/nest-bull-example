@@ -46,8 +46,7 @@ export class TaskModule implements OnModuleInit {
 
     // 방법 4. discard & moveToCompleted 호출.
     // this.method4(job);
-    // 결과 4.
-    /*
+    /* 결과 4.
      * OnQueueWaiting 3
      * Processing 3 for 20 seconds
      * OnQueueActive 3
@@ -55,12 +54,11 @@ export class TaskModule implements OnModuleInit {
      * Processing done 3
      * OnQueueError Error: Missing lock for job 3 failed
      * OnQueueDrained
-     * */
+     */
 
     // 방법 5. moveToCompleted & discard 호출.
-    this.method5(job);
-    // 결과 5.
-    /*
+    // this.method5(job);
+    /* 결과 5.
      * OnQueueWaiting 5
      * Processing 5 for 40 seconds
      * OnQueueActive 5
@@ -68,7 +66,28 @@ export class TaskModule implements OnModuleInit {
      * Processing done 5
      * OnQueueError Error: Missing lock for job 5 failed
      * OnQueueDrained
-     * */
+     */
+
+    // 방법 6. moveToCompleted(ignore lock) & discard 호출.
+    this.method6(job);
+    /* 결과 6.
+     * OnQueueWaiting 7
+     * Processing 7 for 30 seconds
+     * OnQueueActive 7
+     * moveToCompleted & discard
+     * Processing done 7
+     * OnQueueCompleted 7 undefined
+     * OnQueueDrained
+     */
+  }
+
+  private method6(job: Job) {
+    setTimeout(async () => {
+      console.log('moveToCompleted & discard ');
+      await job.moveToCompleted(undefined, true);
+      await job.discard();
+      await this.showJobs();
+    }, 4000);
   }
 
   private method5(job: Job) {
